@@ -1,0 +1,71 @@
+# This example shows how to fetch prompts from promptman.dev
+# Requires PROMPTMAN_API_KEY to be set
+
+name: Customer support agent from Promptman cloud
+
+# Fetch the system prompt from promptman.dev
+system_prompt:
+  promptman:
+    slug: customer-support-agent
+    stage: prod
+    variables:
+      companyName: "Acme Corp"
+      supportHours: "9am-5pm CET"
+
+tools:
+  - name: lookup_order
+    description: Look up an order by order ID
+    parameters:
+      type: object
+      properties:
+        order_id:
+          type: string
+      required: [order_id]
+
+  - name: create_ticket
+    description: Create a support ticket
+    parameters:
+      type: object
+      properties:
+        subject:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        customer_email:
+          type: string
+      required: [subject, priority]
+
+steps:
+  - user: "Hi, I have a problem with my order #ORD-12345"
+    expect:
+      tool_calls:
+        - name: lookup_order
+          args:
+            order_id: { contains: "12345" }
+    mock:
+      lookup_order:
+        return:
+          order_id: "ORD-12345"
+          status: "shipped"
+          tracking: "TRK-9876543"
+          estimated_delivery: "2026-03-01"
+
+  - expect:
+      response:
+        contains: "shipped"
+
+  - user: "It says shipped but I haven't received it and it's been 2 weeks"
+    expect:
+      tool_calls:
+        - name: create_ticket
+          args:
+            priority: { matches: "high|urgent" }
+      response:
+        contains: "ticket"
+    mock:
+      create_ticket:
+        return:
+          ticket_id: "TKT-5678"
+          status: "open"
+          message: "A support agent will follow up within 24 hours"

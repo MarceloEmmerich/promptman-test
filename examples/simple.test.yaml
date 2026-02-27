@@ -1,0 +1,33 @@
+name: Simple weather lookup
+
+system_prompt: |
+  You are a weather assistant. When users ask about weather,
+  use the get_weather tool to look up current conditions.
+  Be concise in your responses.
+
+tools:
+  - name: get_weather
+    description: Get current weather for a location
+    parameters:
+      type: object
+      properties:
+        location:
+          type: string
+          description: City name or coordinates
+      required: [location]
+
+steps:
+  - user: "What's the weather in Berlin?"
+    expect:
+      tool_calls:
+        - name: get_weather
+          args:
+            location: { contains: "Berlin" }
+    mock:
+      get_weather:
+        return: { temperature: 12, condition: "Cloudy", humidity: 65 }
+
+  - expect:
+      response:
+        contains: "12"
+        not_contains: "error"

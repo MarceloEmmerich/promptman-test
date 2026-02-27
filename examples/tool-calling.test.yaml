@@ -1,0 +1,41 @@
+name: Calculator agent - conditional tool use
+
+system_prompt: |
+  You are a calculator assistant. Use the calculate tool for math operations.
+  For simple questions you can answer directly without tools.
+  Always show the result clearly.
+
+tools:
+  - name: calculate
+    description: Perform a mathematical calculation
+    parameters:
+      type: object
+      properties:
+        expression:
+          type: string
+          description: Mathematical expression to evaluate
+      required: [expression]
+
+steps:
+  # Should use the tool for complex math
+  - user: "What is 847 * 293 + 1582?"
+    expect:
+      tool_calls:
+        - name: calculate
+          args:
+            expression: { matches: "847.*293.*1582" }
+    mock:
+      calculate:
+        return: { result: 249753 }
+
+  - expect:
+      response:
+        contains: "249753"
+
+  # Should NOT call the tool for trivial math
+  - user: "What is 2 + 2?"
+    expect:
+      tool_calls_not:
+        - name: calculate
+      response:
+        contains: "4"

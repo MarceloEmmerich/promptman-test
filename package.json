@@ -1,0 +1,47 @@
+{
+  "name": "promptman-test",
+  "version": "1.0.0",
+  "description": "Local test runner for multi-turn, tool-calling LLM prompts",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "promptman-test": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "llm",
+    "testing",
+    "prompt",
+    "tool-calling",
+    "multi-turn",
+    "openai",
+    "agent",
+    "promptman"
+  ],
+  "author": "Promptman <hello@promptman.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/promptman-dev/promptman-test"
+  },
+  "homepage": "https://promptman.dev",
+  "dependencies": {
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "glob": "^11.0.0",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}

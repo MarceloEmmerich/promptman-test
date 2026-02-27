@@ -1,0 +1,104 @@
+name: Hotel booking - multi-turn with tool chain
+
+provider:
+  model: gpt-4o-mini
+
+system_prompt: |
+  You are a hotel booking assistant. Help users search for hotels
+  and make reservations. Always confirm details before booking.
+
+tools:
+  - name: search_hotels
+    description: Search for available hotels
+    parameters:
+      type: object
+      properties:
+        destination:
+          type: string
+        check_in:
+          type: string
+          format: date
+        check_out:
+          type: string
+          format: date
+        guests:
+          type: integer
+          description: Number of guests
+      required: [destination, check_in]
+
+  - name: get_hotel_details
+    description: Get detailed information about a specific hotel
+    parameters:
+      type: object
+      properties:
+        hotel_id:
+          type: string
+      required: [hotel_id]
+
+  - name: create_reservation
+    description: Create a hotel reservation
+    parameters:
+      type: object
+      properties:
+        hotel_id:
+          type: string
+        guest_name:
+          type: string
+        check_in:
+          type: string
+        check_out:
+          type: string
+      required: [hotel_id, guest_name]
+
+steps:
+  - user: "Find me a hotel in Maldives for March 15-22, 2 guests"
+    expect:
+      tool_calls:
+        - name: search_hotels
+          args:
+            destination: { contains: "Maldives" }
+    mock:
+      search_hotels:
+        return:
+          - { id: "h1", name: "Ocean Villa Resort", rating: 4.8, price_per_night: 450 }
+          - { id: "h2", name: "Beach Paradise", rating: 4.2, price_per_night: 280 }
+          - { id: "h3", name: "Coral Reef Lodge", rating: 4.5, price_per_night: 350 }
+
+  - expect:
+      response:
+        contains: "Ocean Villa"
+
+  - user: "Tell me more about the Ocean Villa Resort"
+    expect:
+      tool_calls:
+        - name: get_hotel_details
+          args:
+            hotel_id: "h1"
+    mock:
+      get_hotel_details:
+        return:
+          name: "Ocean Villa Resort"
+          rating: 4.8
+          amenities: ["spa", "pool", "restaurant", "diving center"]
+          room_types: ["standard", "deluxe", "villa"]
+
+  - user: "Great, book it for John Smith"
+    expect:
+      tool_calls:
+        - name: create_reservation
+          args:
+            hotel_id: "h1"
+            guest_name: { contains: "John" }
+      response:
+        contains: ["confirmed", "John"]
+        not_contains: "error"
+    mock:
+      create_reservation:
+        return:
+          confirmation_id: "RES-2026-78432"
+          status: "confirmed"
+          hotel: "Ocean Villa Resort"
+
+  - assert:
+      tool_order: [search_hotels, get_hotel_details, create_reservation]
+      total_tool_calls: { gte: 3, lte: 6 }
