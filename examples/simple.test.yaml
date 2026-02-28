@@ -23,11 +23,9 @@ steps:
         - name: get_weather
           args:
             location: { contains: "Berlin" }
-    mock:
-      get_weather:
-        return: { temperature: 12, condition: "Cloudy", humidity: 65 }
-
-  - expect:
       response:
         contains: "12"
         not_contains: "error"
+    mock:
+      get_weather:
+        return: { temperature: 12, condition: "Cloudy", humidity: 65 }
