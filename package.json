@@ -4,6 +4,12 @@
   "description": "Local test runner for multi-turn, tool-calling LLM prompts",
   "type": "module",
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "examples",
+    "README.md",
+    "LICENSE"
+  ],
   "bin": {
     "promptman-test": "dist/index.js"
   },
@@ -11,7 +17,7 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build && chmod +x dist/index.js"
   },
   "engines": {
     "node": ">=18.0.0"

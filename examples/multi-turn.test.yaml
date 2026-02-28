@@ -5,7 +5,10 @@ provider:
 
 system_prompt: |
   You are a hotel booking assistant. Help users search for hotels
-  and make reservations. Always confirm details before booking.
+  and make reservations. When the user asks to book, proceed
+  immediately with the create_reservation tool — do not ask for
+  additional confirmation. Use the information already available
+  from the conversation.
 
 tools:
   - name: search_hotels
@@ -57,16 +60,14 @@ steps:
         - name: search_hotels
           args:
             destination: { contains: "Maldives" }
+      response:
+        contains: "Ocean Villa"
     mock:
       search_hotels:
         return:
           - { id: "h1", name: "Ocean Villa Resort", rating: 4.8, price_per_night: 450 }
           - { id: "h2", name: "Beach Paradise", rating: 4.2, price_per_night: 280 }
           - { id: "h3", name: "Coral Reef Lodge", rating: 4.5, price_per_night: 350 }
-
-  - expect:
-      response:
-        contains: "Ocean Villa"
 
   - user: "Tell me more about the Ocean Villa Resort"
     expect:
