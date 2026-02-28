@@ -20,7 +20,7 @@
     "prepublishOnly": "npm run build && chmod +x dist/index.js"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "keywords": [
     "llm",

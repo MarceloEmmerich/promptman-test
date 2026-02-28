@@ -4,7 +4,7 @@
 
 [![npm](https://img.shields.io/npm/v/promptman-test)](https://npmjs.com/package/promptman-test)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-brightgreen)](https://nodejs.org)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D22-brightgreen)](https://nodejs.org)
 
 Define your agent's expected behavior in YAML. Run it against real LLMs with your own API keys. Get pass/fail results.
 
