@@ -97,7 +97,7 @@ export async function run(paths: string[], options: CLIOptions): Promise<void> {
   const results: RunResult['tests'] = [];
 
   if (!isJson) {
-    process.stdout.write(`\n ${chalk.bold('promptman-test')} ${chalk.dim('v1.0.0')}\n\n`);
+    process.stderr.write(`\n ${chalk.bold('promptman-test')} ${chalk.dim('v1.0.0')}\n\n`);
   }
 
   for (const { file, test } of parsed) {
