@@ -32,11 +32,11 @@
     "agent",
     "promptman"
   ],
-  "author": "Promptman <hello@promptman.dev>",
+  "author": "Marcelo Emmerioch <marcelo@promptman.dev>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/promptman-dev/promptman-test"
+    "url": "https://github.com/MarceloEmmerich/promptman-test"
   },
   "homepage": "https://promptman.dev",
   "dependencies": {
