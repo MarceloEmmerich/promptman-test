@@ -203,6 +203,9 @@ export interface TestResult {
   error?: string;
 }
 
+export type OnStepCallback = (step: StepResult, testName: string) => void;
+export type OnTestStartCallback = (testName: string, file: string) => void;
+
 export interface RunResult {
   tests: TestResult[];
   summary: {

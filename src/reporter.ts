@@ -2,6 +2,76 @@ import chalk from 'chalk';
 import type { TestResult, RunResult, StepResult, AssertionResult } from './types.js';
 import { formatCost, formatDuration } from './utils.js';
 
+// ── Live Reporter (streaming) ───────────────────────────────────────────────
+
+export function printTestStart(name: string): void {
+  process.stdout.write(` ${chalk.cyan('⟳')} ${name}\n`);
+}
+
+export function printStepLive(step: StepResult, verbose: boolean): void {
+  const userLabel = step.userMessage ? `"${truncate(step.userMessage, 50)}"` : '(continued)';
+  const icon = step.passed ? chalk.green('✓') : chalk.red('✗');
+
+  process.stdout.write(`   ${icon} Step ${step.stepIndex + 1}: ${chalk.dim(userLabel)}\n`);
+
+  if (verbose) {
+    for (const a of step.assertions) {
+      process.stdout.write(`     ${a.passed ? chalk.green('✓') : chalk.red('✗')} ${a.message}\n`);
+    }
+    if (step.toolCalls.length > 0) {
+      process.stdout.write(chalk.dim(`     Tool calls:\n`));
+      for (const tc of step.toolCalls) {
+        process.stdout.write(chalk.dim(`       → ${tc.function.name}(${truncate(tc.function.arguments, 80)})\n`));
+      }
+    }
+    if (step.assistantResponse) {
+      process.stdout.write(chalk.dim(`     Response: "${truncate(step.assistantResponse, 120)}"\n`));
+    }
+  } else {
+    // Compact: only show failed assertions
+    for (const a of step.assertions) {
+      if (!a.passed) {
+        process.stdout.write(`     ${chalk.red('✗')} ${a.message}\n`);
+      }
+    }
+  }
+}
+
+export function printTestEnd(test: TestResult): void {
+  const icon = test.passed ? chalk.green('✓') : chalk.red('✗');
+  const meta = chalk.dim(
+    `(${formatDuration(test.durationMs)}, ${test.totalTokens.toLocaleString()} tokens, ~${formatCost(test.estimatedCost)})`,
+  );
+
+  // Overwrite the "running" line: move cursor up to the test name line
+  // We can't easily count lines, so just print the final status
+  process.stdout.write(` ${icon} ${test.name} ${meta}\n`);
+
+  // Print global assertions
+  if (test.globalAssertions.length > 0) {
+    for (const a of test.globalAssertions) {
+      process.stdout.write(`   ${a.passed ? chalk.green('✓') : chalk.red('✗')} ${a.message}\n`);
+    }
+  }
+
+  if (test.error) {
+    process.stdout.write(`   ${chalk.red('Error:')} ${test.error}\n`);
+  }
+}
+
+export function printSummary(result: RunResult): void {
+  process.stdout.write('\n');
+  const passedStr = result.summary.passed > 0 ? chalk.green(`${result.summary.passed} passed`) : '';
+  const failedStr = result.summary.failed > 0 ? chalk.red(`${result.summary.failed} failed`) : '';
+  const errorStr = result.summary.errors > 0 ? chalk.yellow(`${result.summary.errors} error(s)`) : '';
+  const parts = [passedStr, failedStr, errorStr].filter(Boolean);
+
+  process.stdout.write(` ${chalk.bold('Tests:')}  ${parts.join(', ')} ${chalk.dim(`(${result.summary.total} total)`)}\n`);
+  process.stdout.write(` ${chalk.bold('Time:')}   ${formatDuration(result.duration_ms)}\n`);
+  process.stdout.write(` ${chalk.bold('Tokens:')} ${result.tokens.total.toLocaleString()} ${chalk.dim(`(~${formatCost(result.tokens.cost_usd)})`)}\n`);
+  process.stdout.write('\n');
+}
+
 // ── JSON Reporter ───────────────────────────────────────────────────────────
 
 export function reportJSON(result: RunResult): string {

@@ -10,6 +10,8 @@ import type {
   ToolDefinition,
   AssertionResult,
   SystemPromptSource,
+  OnStepCallback,
+  OnTestStartCallback,
 } from './types.js';
 import { evaluateStepAssertions, evaluateGlobalAssertions } from './assertions.js';
 import { resolveMocks } from './mocks.js';
@@ -104,10 +106,16 @@ async function resolveSystemPrompt(
  * Execute a single test definition against the LLM.
  * Runs the multi-turn loop, evaluates assertions, returns results.
  */
+export interface ExecuteOptions {
+  onStep?: OnStepCallback;
+  onTestStart?: OnTestStartCallback;
+}
+
 export async function executeTest(
   test: TestDefinition,
   config: Config,
   filePath: string,
+  options?: ExecuteOptions,
 ): Promise<TestResult> {
   const startTime = Date.now();
   const allToolCalls: ToolCall[] = [];
@@ -118,6 +126,9 @@ export async function executeTest(
   let totalTurns = 0;
 
   try {
+    // Notify test start
+    options?.onTestStart?.(test.name, filePath);
+
     // Resolve system prompt
     const systemPrompt = await resolveSystemPrompt(test.system_prompt, config);
 
@@ -216,14 +227,17 @@ export async function executeTest(
       // Evaluate step assertions
       const assertions = evaluateStepAssertions(step.expect, stepToolCalls, assistantResponse);
 
-      stepResults.push({
+      const stepResult: StepResult = {
         stepIndex: stepIdx,
         userMessage: step.user,
         assertions,
         toolCalls: stepToolCalls,
         assistantResponse,
         passed: assertions.every(a => a.passed),
-      });
+      };
+
+      stepResults.push(stepResult);
+      options?.onStep?.(stepResult, test.name);
     }
 
     // Process global assertion steps
