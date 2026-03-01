@@ -44,6 +44,8 @@ steps:
         - name: lookup_order
           args:
             order_id: { contains: "12345" }
+      response:
+        contains: "shipped"
     mock:
       lookup_order:
         return:
@@ -51,10 +53,6 @@ steps:
           status: "shipped"
           tracking: "TRK-9876543"
           estimated_delivery: "2026-03-01"
-
-  - expect:
-      response:
-        contains: "shipped"
 
   - user: "It says shipped but I haven't received it and it's been 2 weeks"
     expect:
