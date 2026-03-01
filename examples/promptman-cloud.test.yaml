@@ -6,7 +6,7 @@ name: Customer support agent from Promptman cloud
 # Fetch the system prompt from promptman.dev
 system_prompt:
   promptman:
-    slug: customer-support-agent
+    slug: system-prompt-fmkioo
     stage: prod
     variables:
       companyName: "Acme Corp"
