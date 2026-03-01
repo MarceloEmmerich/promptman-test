@@ -7,7 +7,8 @@ name: Customer support agent from Promptman cloud
 system_prompt:
   promptman:
     slug: system-prompt-fmkioo
-    stage: prod
+    app: customer-support-agent-daqx5m
+    stage: dev
     variables:
       companyName: "Acme Corp"
       supportHours: "9am-5pm CET"

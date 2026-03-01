@@ -20,14 +20,17 @@ export async function fetchPrompt(
     );
   }
 
-  const url = new URL(`/prompt/${encodeURIComponent(source.slug)}`, config.base_url);
+  const url = new URL(`/v1/prompts/${encodeURIComponent(source.slug)}`, config.base_url);
   if (source.stage) {
     url.searchParams.set('stage', source.stage);
+  }
+  if (source.app) {
+    url.searchParams.set('app', source.app);
   }
 
   const response = await fetch(url.toString(), {
     headers: {
-      Authorization: `Bearer ${config.api_key}`,
+      'X-API-Key': config.api_key,
       Accept: 'application/json',
     },
   });

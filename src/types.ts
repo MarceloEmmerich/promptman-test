@@ -122,6 +122,7 @@ export interface StepMock {
 
 export interface PromptmanSource {
   slug: string;
+  app?: string;
   stage?: string;
   variables?: Record<string, string>;
 }
