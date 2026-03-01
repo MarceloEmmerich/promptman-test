@@ -24,13 +24,11 @@ steps:
         - name: calculate
           args:
             expression: { matches: "847.*293.*1582" }
+      response:
+        contains: "249753"
     mock:
       calculate:
         return: { result: 249753 }
-
-  - expect:
-      response:
-        contains: "249753"
 
   # Should NOT call the tool for trivial math
   - user: "What is 2 + 2?"
