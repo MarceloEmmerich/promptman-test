@@ -80,6 +80,7 @@ export interface ToolCallAssertion {
 
 export interface ResponseAssertion {
   contains?: string | string[];
+  contains_any?: string[];
   not_contains?: string | string[];
   matches?: string;
   min_length?: number;

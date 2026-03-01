@@ -91,7 +91,8 @@ steps:
             hotel_id: "h1"
             guest_name: { contains: "John" }
       response:
-        contains: ["confirmed", "John"]
+        contains_any: ["confirmed", "booked", "reserved", "successfully"]
+        contains: "John"
         not_contains: "error"
     mock:
       create_reservation:

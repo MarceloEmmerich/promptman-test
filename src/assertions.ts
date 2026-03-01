@@ -204,6 +204,15 @@ function evaluateResponseAssertion(
     }
   }
 
+  if (expected.contains_any) {
+    const found = expected.contains_any.some(needle => actual.includes(needle));
+    results.push(
+      found
+        ? ok(`Response contains one of: ${expected.contains_any.map(n => `"${n}"`).join(', ')}`)
+        : fail(`Response should contain one of: ${expected.contains_any.map(n => `"${n}"`).join(', ')} — got: "${actual.slice(0, 100)}${actual.length > 100 ? '...' : ''}"`),
+    );
+  }
+
   if (expected.not_contains) {
     const needles = Array.isArray(expected.not_contains) ? expected.not_contains : [expected.not_contains];
     for (const needle of needles) {
