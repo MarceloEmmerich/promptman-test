@@ -163,7 +163,7 @@ export class LiveReporter {
 
     // Response
     if (step.assistantResponse) {
-      live(`    ${chalk.dim('│')} ${chalk.dim('💬')} ${chalk.dim(truncate(step.assistantResponse, 80))}\n`);
+      live(`    ${chalk.dim('│')} ${chalk.dim('›')} ${chalk.dim(truncate(step.assistantResponse, 80))}\n`);
     }
 
     live(`    ${chalk.dim('│')}\n`);
