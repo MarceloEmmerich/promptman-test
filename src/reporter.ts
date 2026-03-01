@@ -157,7 +157,7 @@ export class LiveReporter {
     // Tool calls
     if (step.toolCalls.length > 0) {
       for (const tc of step.toolCalls) {
-        live(`    ${chalk.dim('│')} ${chalk.yellow('🔨')} ${chalk.yellow(tc.function.name)}${chalk.dim('(')}${chalk.dim(truncate(tc.function.arguments, 60))}${chalk.dim(')')}\n`);
+        live(`    ${chalk.dim('│')} ${chalk.yellow('▸')} ${chalk.yellow(tc.function.name)}${chalk.dim('(')}${chalk.dim(truncate(tc.function.arguments, 60))}${chalk.dim(')')}\n`);
       }
     }
 
