@@ -1,4 +1,3 @@
-import chalk from 'chalk';
 import { resolve } from 'node:path';
 import { statSync } from 'node:fs';
 import { glob } from 'glob';
@@ -6,14 +5,7 @@ import type { Config, CLIOptions, RunResult, TestDefinition } from './types.js';
 import { loadConfig } from './config.js';
 import { parseTestFile } from './parser.js';
 import { executeTest } from './executor.js';
-import {
-  reportJSON,
-  reportDryRun,
-  printTestStart,
-  printStepLive,
-  printTestEnd,
-  printSummary,
-} from './reporter.js';
+import { LiveReporter, reportJSON, reportDryRun } from './reporter.js';
 
 /**
  * Discover test files from the given paths (files or directories).
@@ -91,23 +83,23 @@ export async function run(paths: string[], options: CLIOptions): Promise<void> {
 
   const isJson = !!options.json;
   const verbose = config.settings.verbose || !!options.verbose;
+  const reporter = new LiveReporter(verbose);
 
   // Execute tests sequentially
   const startTime = Date.now();
   const results: RunResult['tests'] = [];
 
   if (!isJson) {
-    process.stderr.write(`\n ${chalk.bold('promptman-test')} ${chalk.dim('v1.0.0')}\n\n`);
+    reporter.printHeader();
   }
 
   for (const { file, test } of parsed) {
     const result = await executeTest(test, config, file, isJson ? undefined : {
-      onTestStart: (name) => printTestStart(name),
-      onStep: (step) => printStepLive(step, verbose),
+      onProgress: (event) => reporter.handleEvent(event),
     });
 
     if (!isJson) {
-      printTestEnd(result);
+      reporter.printTestEnd(result);
     }
 
     results.push(result);
@@ -138,7 +130,7 @@ export async function run(paths: string[], options: CLIOptions): Promise<void> {
   if (isJson) {
     console.log(reportJSON(runResult));
   } else {
-    printSummary(runResult);
+    reporter.printSummary(runResult);
   }
 
   // Exit code

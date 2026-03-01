@@ -10,8 +10,8 @@ import type {
   ToolDefinition,
   AssertionResult,
   SystemPromptSource,
-  OnStepCallback,
-  OnTestStartCallback,
+  OnProgressCallback,
+  ProgressEvent,
 } from './types.js';
 import { evaluateStepAssertions, evaluateGlobalAssertions } from './assertions.js';
 import { resolveMocks } from './mocks.js';
@@ -107,8 +107,7 @@ async function resolveSystemPrompt(
  * Runs the multi-turn loop, evaluates assertions, returns results.
  */
 export interface ExecuteOptions {
-  onStep?: OnStepCallback;
-  onTestStart?: OnTestStartCallback;
+  onProgress?: OnProgressCallback;
 }
 
 export async function executeTest(
@@ -126,8 +125,10 @@ export async function executeTest(
   let totalTurns = 0;
 
   try {
-    // Notify test start
-    options?.onTestStart?.(test.name, filePath);
+    const emit = (event: Omit<ProgressEvent, 'testName'>) =>
+      options?.onProgress?.({ ...event, testName: test.name } as ProgressEvent);
+
+    emit({ type: 'test:start', file: filePath });
 
     // Resolve system prompt
     const systemPrompt = await resolveSystemPrompt(test.system_prompt, config);
@@ -151,6 +152,8 @@ export async function executeTest(
         messages.push({ role: 'user', content: step.user });
       }
 
+      emit({ type: 'step:start', stepIndex: stepIdx, userMessage: step.user });
+
       const stepToolCalls: ToolCall[] = [];
       let assistantResponse: string | undefined;
       let turnCount = 0;
@@ -159,6 +162,8 @@ export async function executeTest(
       while (turnCount < config.settings.max_turns) {
         totalTurns++;
         turnCount++;
+
+        emit({ type: 'step:llm_call', stepIndex: stepIdx });
 
         const completion = await callLLM(messages, test.tools ?? [], config, test.provider);
 
@@ -191,6 +196,12 @@ export async function executeTest(
           stepToolCalls.push(...msg.tool_calls);
           allToolCalls.push(...msg.tool_calls);
 
+          emit({
+            type: 'step:tool_calls',
+            stepIndex: stepIdx,
+            toolNames: msg.tool_calls.map(tc => tc.function.name),
+          });
+
           if (completion.usage) {
             totalOutputTokens += estimateTokens(JSON.stringify(msg.tool_calls));
           }
@@ -206,6 +217,8 @@ export async function executeTest(
               tool_call_id: toolCall.id,
             });
           }
+
+          emit({ type: 'step:mock_inject', stepIndex: stepIdx });
 
           // Continue the loop — let the LLM process tool results
           continue;
@@ -237,7 +250,7 @@ export async function executeTest(
       };
 
       stepResults.push(stepResult);
-      options?.onStep?.(stepResult, test.name);
+      emit({ type: 'step:complete', stepIndex: stepIdx, step: stepResult });
     }
 
     // Process global assertion steps

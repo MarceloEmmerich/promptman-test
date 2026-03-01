@@ -203,8 +203,18 @@ export interface TestResult {
   error?: string;
 }
 
-export type OnStepCallback = (step: StepResult, testName: string) => void;
-export type OnTestStartCallback = (testName: string, file: string) => void;
+export interface ProgressEvent {
+  type: 'test:start' | 'step:start' | 'step:llm_call' | 'step:tool_calls' | 'step:mock_inject' | 'step:complete' | 'test:complete';
+  testName: string;
+  file?: string;
+  stepIndex?: number;
+  userMessage?: string;
+  toolNames?: string[];
+  step?: StepResult;
+  test?: TestResult;
+}
+
+export type OnProgressCallback = (event: ProgressEvent) => void;
 
 export interface RunResult {
   tests: TestResult[];
