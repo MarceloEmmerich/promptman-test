@@ -3,7 +3,7 @@ name: Calculator agent - conditional tool use
 system_prompt: |
   You are a calculator assistant. Use the calculate tool for math operations.
   For simple questions you can answer directly without tools.
-  Always show the result clearly.
+  Always show the result clearly without any punctuation in the numbers.
 
 tools:
   - name: calculate
